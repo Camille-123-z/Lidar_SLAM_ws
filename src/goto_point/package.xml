@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>goto_point</name>
+  <version>0.1.0</version>
+  <description>Simple go-to-point controller using LiDAR SLAM localization (no Nav2)</description>
+  <maintainer email="zhang_hong_yi2025@qq.com">Camille-123-z</maintainer>
+  <license>MIT</license>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

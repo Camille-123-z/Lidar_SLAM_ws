@@ -42,6 +42,7 @@ TF 坐标树：`map → odom → base_footprint → chassis → livox_frame`
 | 全局定位（独立库） | `registration/3d_bbs` | 3D-BBS 全局定位（**非 colcon 包**，已加 `COLCON_IGNORE`，可选手动构建） |
 | 桥接节点 | `lio_interface` | LIO 内部坐标系 → 标准 odom 的 TF 桥接，转发 `/registered_scan` `/registered_odometry` |
 | 桥接节点 | `sensor_scan_generation` | 发布 `/odom` `/lidar_frame_pcd` 及 `odom→base_footprint` TF |
+| 走点导航 | `goto_point` | 极简点到点控制器：订阅 `/goal_pose`，输出 `/cmd_vel`（不用 Nav2） |
 
 ## 环境要求
 
@@ -114,6 +115,29 @@ ros2 launch global_relocalization_kiss_matcher run_kiss_matcher_sam.launch.yaml 
 ```
 
 回环检测参数在 `src/registration/global_relocalization_kiss_matcher/config/slam_config.yaml`（`loop_detection_radius`、`keyframe_threshold`、`voxel_resolution` 等，按环境调整）。
+
+### 3. 点到点走位（从启动区到目标点）
+
+`goto_point` 用 LiDAR 定位（TF）做闭环，输出 `/cmd_vel` 走到目标点，**不依赖 Nav2**：
+
+```bash
+source install/setup.bash
+ros2 launch goto_point goto_point.launch.py
+```
+
+然后给目标点（二选一）：
+
+- **RViz**：Fixed Frame 选 `odom`，用工具栏的 **"2D Goal Pose"** 在地图上点一下；
+- **命令行**：
+
+```bash
+ros2 topic pub /goal_pose geometry_msgs/msg/PoseStamped \
+  "{header: {frame_id: 'odom'}, pose: {position: {x: 3.0, y: 0.0}}}" --once
+```
+
+控制参数（速度、到达容差等）在 `src/goto_point/config/goto_point.yaml`。
+
+> `goto_point` 输出 `/cmd_vel`（Twist）；若你的底盘走串口下位机，需把 `/cmd_vel` 接到一个串口桥（可参考 robocon-fsm 的 `robot_serial` 思路）。
 
 ### 3. 全局重定位 / 重定位
 

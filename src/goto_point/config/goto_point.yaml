@@ -1,0 +1,14 @@
+goto_point:
+  ros__parameters:
+    goal_topic: "goal_pose"          # 目标点话题(RViz "2D Goal Pose" 默认发这里)
+    default_goal_frame: "odom"       # 目标点默认所在坐标系(启动点≈原点)
+    base_frame: "base_footprint"     # 机器人本体坐标系
+    cmd_vel_topic: "cmd_vel"         # 输出控制话题
+
+    linear_speed: 0.26               # m/s,前进速度上限
+    angular_speed: 1.0               # rad/s,转向速度上限
+    dist_tolerance: 0.10             # m,到达判定距离
+    angle_tolerance: 0.10            # rad,先转向对准的阈值
+    kp_lin: 0.5
+    kp_ang: 2.0
+    control_rate: 20.0               # Hz,控制频率
