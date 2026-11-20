@@ -60,6 +60,8 @@ TF 坐标树：`map → odom → base_footprint → chassis → livox_frame`
 | `GTSAM`（`libgtsam`） | `apt install libgtsam-dev` 或源码安装 | 位姿图优化 |
 
 > `kiss_matcher`、`robin`、`GTSAM` 是 `global_relocalization_kiss_matcher`（回环检测）的硬依赖；若暂时只跑「驱动 + FAST-LIO + 桥接」，可先跳过该包的构建（`colcon build --packages-skip global_relocalization_kiss_matcher`）。
+>
+> 完整安装步骤见 **[docs/dependencies.md](docs/dependencies.md)**（注意 kiss_matcher 静态库必须加 `-fPIC` 编译）。
 
 ## 构建
 
