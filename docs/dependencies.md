@@ -5,6 +5,8 @@
 > 若暂时只跑「驱动 + FAST-LIO + 桥接」，可跳过本页，用
 > `colcon build --packages-skip global_relocalization_kiss_matcher` 即可。
 
+**目录说明**：第 1、2 步是全局安装，在哪个目录跑都一样；第 3 步请在工作空间**外面**的独立目录（如 `~/deps/`）进行，**不要**放进 `Lidar_SLAM_ws` 或 `src/`（KISS-Matcher 不是 colcon 包，放进 `src/` 会干扰构建）。只有最后的 `colcon build` 才在工作空间里执行。
+
 ## 1. 系统依赖（apt）
 
 ```bash
