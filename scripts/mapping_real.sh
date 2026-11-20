@@ -7,6 +7,9 @@ cd "$WORKSPACE_ROOT" || exit 1
 # 实机：驱动 + FAST-LIO + 桥接（里程计/建图）
 # 回环检测请另开终端运行 ./slam.sh
 
+# 0. 静态 TF：base_footprint → livox_frame（雷达安装外参，先编辑 scripts/robot_tf.sh）
+gnome-terminal --title="静态 TF" -- bash -c "./scripts/robot_tf.sh"
+
 # 1. Livox MID-360 驱动（PointCloud2 格式，供 FAST-LIO 使用）
 gnome-terminal --title="Livox MID-360 驱动" -- bash -c "
 source install/setup.bash;

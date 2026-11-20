@@ -16,7 +16,6 @@ def generate_launch_description():
         output='screen',
         emulate_tty=True,  # 开启提示颜色
         parameters=[{
-            'use_sim_time': True,
             'odometry_sub': '/Odometry',
         }],
     )

@@ -15,7 +15,7 @@ def generate_launch_description():
         namespace='',
         output='screen',
         emulate_tty=True,  # 开启提示颜色
-        parameters=[{'use_sim_time': True}],
+        parameters=[],
     )
 
     return LaunchDescription([lio_interface_node])

@@ -1,8 +1,16 @@
 goto_point:
   ros__parameters:
     goal_topic: "goal_pose"          # 目标点话题(RViz "2D Goal Pose" 默认发这里)
-    default_goal_frame: "odom"       # 目标点默认所在坐标系(启动点≈原点)
-    base_frame: "base_footprint"     # 机器人本体坐标系
+
+    # ---- 定位帧(两种用法) ----
+    # ① 极简(默认,推荐):只用「驱动 + FAST-LIO」,目标点给在 LIO 世界帧 camera_init,
+    #    当前位姿取 FAST-LIO 的 body 帧,无需桥接节点、无需静态 TF。
+    default_goal_frame: "camera_init"
+    base_frame: "body"
+    # ② 完整桥接:先跑 ./mapping_real.sh(含 ./robot_tf.sh),再改成下面两行:
+    # default_goal_frame: "odom"
+    # base_frame: "base_footprint"
+
     cmd_vel_topic: "cmd_vel"         # 输出控制话题
 
     linear_speed: 0.26               # m/s,前进速度上限

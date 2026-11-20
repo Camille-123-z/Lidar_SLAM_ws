@@ -28,6 +28,8 @@ sensor_scan_generation (桥接)
 
 TF 坐标树：`map → odom → base_footprint → chassis → livox_frame`
 
+> 走点（`goto_point`）走更短的链路：`camera_init → body`（FAST-LIO 直接发布），不依赖 `map/odom/base_footprint`。
+
 ## 包含的功能包
 
 | 分类 | 包 | 说明 |
@@ -92,10 +94,13 @@ cd scripts
 
 该脚本依次启动：
 
+0. `robot_tf` → `scripts/robot_tf.sh`（静态 TF `base_footprint → livox_frame`，**请先改成你的雷达安装外参**）
 1. `livox_ros_driver2` → `fast_lio_msg_MID360_launch.py`（MID-360 驱动，PointCloud2 格式）
 2. `fast_lio` → `mapping.launch.py`（FAST-LIO 里程计）
 3. `lio_interface` → `fastlio_lio_interface_launch.py`（TF 桥接）
 4. `sensor_scan_generation` → `sensor_scan_generation_launch.py`（odom / 扫描转发）
+
+> ⚠️ 原仓库的 `base_footprint → livox_frame` 静态 TF 由 URDF（`robot_state_publisher`）发布，本仓库已移除 URDF，故桥接节点会查不到该 TF。请先编辑 `scripts/robot_tf.sh`，把雷达相对 `base_footprint` 的安装外参（x/y/z/yaw/pitch/roll）填进去。
 
 ### 2. 启动回环检测 + 位姿图（KISS-Matcher-SAM）
 
@@ -118,24 +123,28 @@ ros2 launch global_relocalization_kiss_matcher run_kiss_matcher_sam.launch.yaml 
 
 ### 3. 点到点走位（从启动区到目标点）
 
-`goto_point` 用 LiDAR 定位（TF）做闭环，输出 `/cmd_vel` 走到目标点，**不依赖 Nav2**：
+`goto_point` 用 LiDAR 定位做闭环，输出 `/cmd_vel` 走到目标点，**不依赖 Nav2，也不依赖桥接节点**。
+
+**极简走位（推荐，一条命令）**：只跑「驱动 + FAST-LIO + goto_point」，目标点给在 FAST-LIO 的世界帧 `camera_init`（启动点 ≈ 原点，+X ≈ 初始朝向）：
 
 ```bash
-source install/setup.bash
-ros2 launch goto_point goto_point.launch.py
+cd scripts
+./goto.sh
 ```
 
 然后给目标点（二选一）：
 
-- **RViz**：Fixed Frame 选 `odom`，用工具栏的 **"2D Goal Pose"** 在地图上点一下；
+- **RViz**：Fixed Frame 选 `camera_init`，用工具栏 **"2D Goal Pose"** 点一下；
 - **命令行**：
 
 ```bash
 ros2 topic pub /goal_pose geometry_msgs/msg/PoseStamped \
-  "{header: {frame_id: 'odom'}, pose: {position: {x: 3.0, y: 0.0}}}" --once
+  "{header: {frame_id: 'camera_init'}, pose: {position: {x: 3.0, y: 0.0}}}" --once
 ```
 
-控制参数（速度、到达容差等）在 `src/goto_point/config/goto_point.yaml`。
+`goto_point` 用 FAST-LIO 发布的 TF `camera_init → body` 拿当前位姿，算误差后发 `/cmd_vel`。速度、容差等参数在 `src/goto_point/config/goto_point.yaml`。
+
+> 想用完整桥接路径（`odom` / `base_footprint` 帧）？先跑 `./mapping_real.sh`（含静态 TF），再把 `goto_point.yaml` 的 `default_goal_frame` 改成 `odom`、`base_frame` 改成 `base_footprint`，目标点 `frame_id` 也填 `odom`。
 
 > `goto_point` 输出 `/cmd_vel`（Twist）；若你的底盘走串口下位机，需把 `/cmd_vel` 接到一个串口桥（可参考 robocon-fsm 的 `robot_serial` 思路）。
 
